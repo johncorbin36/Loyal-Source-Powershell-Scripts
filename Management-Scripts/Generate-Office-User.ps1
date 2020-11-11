@@ -83,8 +83,8 @@ foreach($Entry in $Data) {
         $UserPrincipalName = $MailNickName + "@loyalsource.com"
 
         # Check if user email exists in Azure
-        if ($AzureUPN -Contains $UserPrincipalName) { Write-Host "User already exists in database" -ForegroundColor Red }
-        else { Write-Host "User does not exist in database." -ForegroundColor Green; break}
+        if ($AzureUPN -Contains $UserPrincipalName) { Write-Host "Email already exists in database" -ForegroundColor Red }
+        else { Write-Host "Email does not exist in database." -ForegroundColor Green; break}
 
         # Next iteration 
         $i = $i + 1
