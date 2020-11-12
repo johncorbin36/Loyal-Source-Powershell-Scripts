@@ -40,7 +40,6 @@ foreach($Entry in $Data) {
 
         # Get AzureAD profile requirements 
         $UserID = (Get-AzureADUser -SearchString $UserEmail).ObjectID
-        $Name = (Get-AzureADUser -SearchString $UserEmail).DisplayName
 
         # Block user sign-in
         Set-AzureADUser -ObjectID $UserEmail -AccountEnabled $false
@@ -67,7 +66,6 @@ foreach($Entry in $Data) {
 
         # Get AzureAD profile requirements 
         $UserID = (Get-AzureADUser -SearchString $UserEmail).ObjectID
-        $Name = (Get-AzureADUser -SearchString $UserEmail).DisplayName
 
         # Mailbox
         if ($ManagerEmail -ne '') {
@@ -90,46 +88,25 @@ foreach($Entry in $Data) {
         Write-Host "Disabled OWA and ActiveSync." -ForegroundColor Green
 
         # Reset Microsoft 365 Password
-        $SecurePassword = convertto-securestring "PASSWORD_HERE" -asplaintext -force
-        Set-AzureADUserPassword -ObjectId $UserID -Password $SecurePassword
+        Set-AzureADUserPassword -ObjectId $UserID -Password $(ConvertTo-SecureString "PASSWORD_HERE" -asplaintext -force)
         Write-Host "Changed user password."
 
-        # Remove user from all distribution groups 
-        $DistributionGroups = Get-DistributionGroup 
-        foreach ($Group in $DistributionGroups) {
-                $Holder = $Group.PrimarySmtpAddress
-                $Members = Get-DistributionGroupMember -Identity $Group.PrimarySmtpAddress
-                Write-Host "Checking distribution group ${Holder} for user"
-                foreach ($Member in $Members) {
-                        if ($Member.PrimarySmtpAddress -eq $UserEmail) {
-                                Write-Host "Removing user from ${Holder}" -ForegroundColor Green
-                                Remove-DistributionGroupMember -Identity $Group.DisplayName -Member $Name -Confirm:$false
-                        }
-                }
+        # Remove user from all distribution groups
+        foreach($DistributionGroup in Get-DistributionGroup | Where-Object { (Get-DistributionGroupMember $_ | ForEach-Object {$_.PrimarySmtpAddress}) -Contains $UserEmail }) {
+                Write-Host "Removing user from ${Holder}" -ForegroundColor Green
+                Remove-DistributionGroupMember $DistributionGroup -Member $UserEmail -Confirm:$false
         }
 
-        # Unified group (Microsoft Office Group)
-        $UnifiedGroups = Get-UnifiedGroup
-        foreach ($Group in $UnifiedGroups) {
-                $Holder = $Group.PrimarySmtpAddress
-                $Members = Get-UnifiedGroupLinks -Identity $Group.PrimarySmtpAddress -LinkType Members
-                Write-Host "Checking Office 365 group ${Holder} for user"
-                foreach ($Member in $Members) {
-                        if ($Member.PrimarySmtpAddress -eq $UserEmail) {
-                                Write-Host "Removing user from ${Holder}"
-                                Remove-UnifiedGroupLinks -Identity $Group.DisplayName -LinkType Members -Links $UserEmail -Confirm:$false
-                        }
-                }       
+        # Remove users from all Azure groups
+        foreach($AzureGroup in Get-AzureADUserMembership -All $True -ObjectID $UserEmail) {
+                Write-Host "Removing user from ${Holder}" -ForegroundColor Green
+                Remove-AzureADGroupMember -ObjectID $AzureGroup.ObjectID -MemberId $(Get-AzureADUser -ObjectID $UserEmail).ObjectID
         }
 
-        # Remove user from all shared email boxes for small PST file
-        Write-Host "Clearing all user shared mailbox permissions, this may take awhile."
-        $Mbs = Get-Mailbox -RecipientTypeDetails SharedMailbox -ResultSize Unlimited | Get-MailboxPermission -User $UserEmail
-        Write-Host $Mbs
-        foreach ($Mb in $Mbs) {
-                $Alias = $Mb.Alias
-                Write-Host "Removing user from ${Alias}" -ForegroundColor Green
-                Remove-MailboxPermission -Identity $Alias -User $UserEmail -AccessRights FullAccess -InheritanceType All -Confirm:$false
+        # Remove user from all shared email boxes
+        foreach ($Mailbox in Get-Mailbox -RecipientTypeDetails SharedMailbox -ResultSize Unlimited | Get-MailboxPermission -User $UserEmail) {
+                Write-Host "Removing user from $($Mailbox.Alias)" -ForegroundColor Green
+                Remove-MailboxPermission -Identity $Mailbox.Alias -User $UserEmail -AccessRights FullAccess -InheritanceType All -Confirm:$false
         }
 
         # Iteration complete

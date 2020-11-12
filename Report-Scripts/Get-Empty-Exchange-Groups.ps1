@@ -9,7 +9,7 @@ if (Test-Path $FilePath) { Remove-Item $FilePath }
 Add-Content -Path $FilePath -Value '"Distrobution Group Name","Distrobution Group Email"'
 
 # Get distribution groups
-$Groups = Get-DistributionGroup -ResultSize Unlimited
+$Groups = Get-DistributionGroup -ResultSize Unlimited | Get-DistributionGroupMember | Select-Object Identity,User,AccessRights | Where-Object {($_.user -like '*@*')}
 
 # For each distribution group in exchange online
 $i = 0
