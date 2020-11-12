@@ -5,16 +5,12 @@ param([String]$FilePath="C:\temp\All-Exchange-Groups.csv")
 Connect-ExchangeOnline
 
 # Create CSV for data
-$FilePath = "C:\temp\All-Exchange-Groups.csv"
 if (Test-Path $FilePath) { Remove-Item $FilePath }
 Add-Content -Path $FilePath -Value '"Group Name","Email","Number of Members","Group Type"'
 
-# Get all shared mailboxes
-$Groups = Get-Group -ResultSize Unlimited
-
 # For each shared mailbox
 $i = 0
-foreach ($Group in $Groups) {
+foreach ($Group in $Groups = Get-Group -ResultSize Unlimited) {
     
     # Write progress
     $i++
