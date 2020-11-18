@@ -16,15 +16,26 @@ foreach ($Group in $Groups = Get-Group -ResultSize Unlimited) {
     $i++
     Write-Progress -Activity "Writing group to list: $($Group.DisplayName)" -Status "$(($i / $Groups.Count)* 100)% Complete:" -PercentComplete (($i / $Groups.Count)* 100)
 
-    # Get all members of the group 
-    if ($Group.RecipientTypeDetails -eq 'MailUniversalDistributionGroup'){ $Members = Get-DistributionGroupMember -Identity $Group.DisplayName } 
-    else { $Members = "N/A" }
+    # Set data for security group
+    if ($Group.RecipientTypeDetails -eq 'RoleGroup') {
+        $Members = Get-RoleGroupMember $Group.Name
+        Add-Content -Path $FilePath -Value "$($Group.Name -Replace ',',''),Not Applicable,$($Members.Count),$($Group.RecipientTypeDetails)"
+    }
 
-    # Write data to file
-    Add-Content -Path $FilePath -Value "$($Group.DisplayName),$($Group.WindowsEmailAddress),$($Members.Count),$($Group.RecipientTypeDetails)"
+    # Set data for distribution list
+    elseif ($Group.RecipientTypeDetails -eq 'MailUniversalDistributionGroup') {
+        $Members = Get-DistributionGroupMember -Identity $Group.DisplayName
+        Add-Content -Path $FilePath -Value "$($Group.DisplayName -Replace ',',''),$($Group.WindowsEmailAddress),$($Members.Count),$($Group.RecipientTypeDetails)"
+    }
+
+    # Set data for unified group
+    elseif ($Group.RecipientTypeDetails -eq 'GroupMailbox') {
+        $Members = Get-UnifiedGroupLinks -Identity $Group.DisplayName -LinkType Members
+        Add-Content -Path $FilePath -Value "$($Group.DisplayName -Replace ',',''),$($Group.WindowsEmailAddress),$($Members.Count),$($Group.RecipientTypeDetails)"
+    }
 
 }
 
 # Complete
-Write-Host 'Script complete.'
+Write-Host "Script complete."
 Write-Host "Data exported to $($FilePath)"

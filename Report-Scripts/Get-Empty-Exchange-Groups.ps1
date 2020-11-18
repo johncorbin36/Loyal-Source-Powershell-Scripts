@@ -14,7 +14,7 @@ foreach ($Group in $Groups = Get-DistributionGroup -ResultSize Unlimited) {
     
     # Write progress
     $i++
-    Write-Progress -Activity "Checking group: $($Group.DisplayName)" -Status "$(($i / $Groups.Count)* 100)% Complete:" -PercentComplete (($i / $Groups.Count)* 100)
+    Write-Progress -Activity "Checking group:" $Group.DisplayName -Status "$(($i / $Groups.Count)* 100)% Complete:" -PercentComplete (($i / $Groups.Count)* 100)
 
     # Check if the group is empty and write to list if true
     if ($(Get-DistributionGroupMember -Identity $Group.DisplayName).Count -eq 0) {
