@@ -98,7 +98,7 @@ foreach($Entry in $Data) {
         }
 
         # Remove users from all Azure groups
-        foreach($AzureGroup in Get-AzureADUserMembership -All $True -ObjectID $UserEmail) {
+        foreach($AzureGroup in Get-AzureADUserMembership -All $true -ObjectID $UserEmail) {
                 Write-Host "Removing user from ${Holder}" -ForegroundColor Green
                 Remove-AzureADGroupMember -ObjectID $AzureGroup.ObjectID -MemberId $(Get-AzureADUser -ObjectID $UserEmail).ObjectID
         }

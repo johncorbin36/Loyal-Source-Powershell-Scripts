@@ -1,5 +1,5 @@
 # Parameters for script
-param([Int32]$Days=365, [String]$FilePath="C:\temp\Inactive-Distribution-Groups.csv")
+param([Int32]$Days=10, [String]$FilePath="C:\temp\Inactive-Distribution-Groups.csv")
 
 # Connect to script dependencies 
 Connect-ExchangeOnline
