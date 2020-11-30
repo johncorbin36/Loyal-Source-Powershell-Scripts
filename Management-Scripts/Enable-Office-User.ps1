@@ -7,14 +7,13 @@ $Option = "Y"
 $Data = @()
 
 # Menu to add user data for termination 
-Write-Host "Enter all user accounts you wish to terminate."
+Write-Host "Enter all user accounts you wish to enable."
 while ($true) {
 
-        # Add user to terminate
+        # Add user to enable
         if (($Option -eq "Y") -or ($Option -eq "y")) {
-                $Term_Email = Read-Host "Enter termination email"
-                $Manager_Email = Read-Host "Enter manager email if you wish to forward (if not just press enter)"
-                $Data = $Data + "${Term_Email}:${Manager_Email}"
+                $Term_Email = Read-Host "Enter email of account to enable"
+                $Data = $Data + $Term_Email
         } elseif (($Option -eq "N") -or ($Option -eq "n")) {
                 break
         } else {
@@ -22,7 +21,7 @@ while ($true) {
         }
 
         # Get option for menu
-        $Option = Read-Host "Do you want to enter another user? [Y] for yes [N] for no"
+        $Option = Read-Host "Do you want to enter another account? [Y] for yes [N] for no"
 
 }
 
@@ -42,7 +41,7 @@ foreach($Entry in $Data) {
         $UserID = (Get-AzureADUser -SearchString $UserEmail).ObjectID
 
         # Block user sign-in
-        Set-AzureADUser -ObjectID $UserEmail -AccountEnabled $false
+        Set-AzureADUser -ObjectID $UserEmail -AccountEnabled $true
         Write-Host "Blocked ${UserEmail} sign-in." -ForegroundColor Green
 
         # Initiate sign out of all devices
@@ -78,7 +77,7 @@ foreach($Entry in $Data) {
         } else {
 
                 # Convert to shared mailbox
-                Set-Mailbox -Identity $UserEmail
+                Set-Mailbox -Identity $UserEmail -Type Shared
                 Write-Host "Shared mailbox." -ForegroundColor Green
 
         }
@@ -91,23 +90,6 @@ foreach($Entry in $Data) {
         Set-AzureADUserPassword -ObjectId $UserID -Password $(ConvertTo-SecureString "PASSWORD_HERE" -asplaintext -force)
         Write-Host "Changed user password."
 
-        # Remove user from all distribution groups
-        foreach($DistributionGroup in Get-DistributionGroup | Where-Object { (Get-DistributionGroupMember $_ | ForEach-Object {$_.PrimarySmtpAddress}) -Contains $UserEmail }) {
-                Write-Host "Removing user from ${Holder}" -ForegroundColor Green
-                Remove-DistributionGroupMember $DistributionGroup -Member $UserEmail -Confirm:$false
-        }
-
-        # Remove users from all Azure groups
-        foreach($AzureGroup in Get-AzureADUserMembership -All $true -ObjectID $UserEmail) {
-                Write-Host "Removing user from ${Holder}" -ForegroundColor Green
-                Remove-AzureADGroupMember -ObjectID $AzureGroup.ObjectID -MemberId $(Get-AzureADUser -ObjectID $UserEmail).ObjectID
-        }
-
-        # Remove user from all shared email boxes
-        foreach ($Mailbox in Get-Mailbox -RecipientTypeDetails SharedMailbox -ResultSize Unlimited | Get-MailboxPermission -User $UserEmail) {
-                Write-Host "Removing user from $($Mailbox.Alias)" -ForegroundColor Green
-                Remove-MailboxPermission -Identity $Mailbox.Alias -User $UserEmail -AccessRights FullAccess -InheritanceType All -Confirm:$false
-        }
 
         # Iteration complete
         Write-Host "Terminated user $UserEmail successfully." -ForegroundColor Green
@@ -116,5 +98,4 @@ foreach($Entry in $Data) {
 }
 
 # Script complete
-Write-Host "Terminated all users."
 Write-Host "Script complete."

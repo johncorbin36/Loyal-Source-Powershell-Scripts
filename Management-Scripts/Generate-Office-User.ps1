@@ -92,9 +92,9 @@ foreach($Entry in $Data) {
     }
 
     # Generate random password
-    for ($i = 0; $i -lt 5; $i++) { $Password += 'abcdefghiklmnoprstuvwxyzABCDEFGHKLMNOPRSTUVWXYZ'[(Get-Random (0..47))]}
-    for ($i = 0; $i -lt 2; $i++) { $Password += '1234567890'[(Get-Random (0..10))]}
-    for ($i = 0; $i -lt 1; $i++) { $Password += '!"$%&/()=}][{@#*+'[(Get-Random (0..17))]}
+    for ($i = 0; $i -lt 5; $i++) { $Password += 'abcdefghkmnprstuvwxyzABCDEFGHKMNPRSTUVWXYZ'[(Get-Random (0..47))]}
+    for ($i = 0; $i -lt 2; $i++) { $Password += '123456789'[(Get-Random (0..10))]}
+    for ($i = 0; $i -lt 1; $i++) { $Password += '!#$%&*+?@'[(Get-Random (0..17))]}
     $Password = ($Password -Split '' | Sort-Object {Get-Random}) -Join ''
 
     # Set password
