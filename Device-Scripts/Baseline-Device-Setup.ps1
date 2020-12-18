@@ -1,17 +1,24 @@
 # Parameters for script
-param([String]$InstallerPath="C:\", [String]$BackgroundImage="C:\Loyal-Source.jpg")
+param([String]$InstallerPath="C:\", [String]$BackgroundImage="C:\Loyal-Source.png")
 
 # Baseline device setup script
 Write-Host "Starting baseline setup." -ForegroundColor Magenta
 
-# Disable security questions for local accounts
-REG ADD "HKLM\Control Panel\Desktop" /v NoLocalPasswordResetQuestions /t REG_DWORD /d "1" /f
+# Change background and lock screen
+Move-Item -Path $BackgroundImage -Destination "C:\Windows\web\wallpaper\Loyal-Source.png"
 
-# Change registry location of wallpaper and update system params
-reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d $BackgroundImage /f
+New-Item -Path "HKLM:\Software\Policies\Microsoft\Windows" -Name Personalization -Force
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name LockScreenImage -value "C:\Windows\web\wallpaper\Loyal-Source.png"
+New-Item -Path "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\Policies" -Name System -Force
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name Wallpaper -value "C:\Windows\web\wallpaper\Loyal-Source.png"
+Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -value "4"
+
 Start-Sleep -s 10
 rundll32.exe user32.dll, UpdatePerUserSystemParameters, 0, $false
-Write-Host "Background has been changed." -ForegroundColor Green
+Write-Host "Background has been changed. Refresh the desktop if not automatically updated." -ForegroundColor Green
+
+# Disable security questions for local accounts
+REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop" /v NoLocalPasswordResetQuestions /t REG_DWORD /d "1" /f
 
 # Change legal notice
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "legalnoticecaption" -Value "CUI DATA - WARNING NOTICE"
@@ -22,12 +29,12 @@ Write-Host "Legal notice has been modified." -ForegroundColor Green
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI" -Name "DisablePasswordReveal" -Value 1
 Write-Host "Reveal password has been disabled." -ForegroundColor Green
 
-# Disable ability to change screensaver settings, set screen saver active and changes timeout to 10 minutes - needs to be tested
-REG ADD "HKCU\Control Panel\Desktop" /v ScreenSaveActive /t REG_SZ /d "1" /f
-REG ADD "HKCU\Control Panel\Desktop" /v LockScreenAutoLockActive /t REG_SZ /d "1" /f
-REG ADD "HKCU\Control Panel\Desktop" /v ScreenSaveTimeOut /t REG_SZ /d "600" /f
-REG ADD "HKCU\Control Panel\Desktop" /v ScreenSaverIsSecure /t REG_SZ /d "1" /f
-REG ADD "HKCU\Control Panel\Desktop" /v SCRNSAVE.EXE /t REG_SZ /d "C:\\Windows\\System32\\scrnsave.scr" /f
+# Disable ability to change screensaver settings, set screen saver active and changes timeout to 10 minutes
+REG ADD "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaveActive /t REG_SZ /d "1" /f
+REG ADD "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v LockScreenAutoLockActive /t REG_SZ /d "1" /f
+REG ADD "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaverIsSecure /t REG_SZ /d "1" /f
+REG ADD "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v SCRNSAVE.EXE /t REG_SZ /d "C:\\Windows\\System32\\scrnsave.scr" /f
+REG ADD "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaveTimeOut /t REG_SZ /d "600" /f
 
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop" /v ScreenSaveActive /t REG_SZ /d "1" /f
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop" /v LockScreenAutoLockActive /t REG_SZ /d "1" /f
@@ -38,7 +45,7 @@ REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop" /v SCRN
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "NoDispScrSavPage" -Value 1
 Write-Host "Screen saver settings have been modified." -ForegroundColor Green
 
-# Sync time - needs to be tested
+# Sync time, change time zone manually 
 w32tm /config /syncfromflags:MANUAL /manualpeerlist:time.nist.gov
 w32tm /config /update
 w32tm /resync
@@ -75,8 +82,8 @@ Remove-Item $InstallerPath\$ChromeInstaller
 Write-Host "Chrome has been installed." -ForegroundColor Green
 
 # Install drive filestream
-$DriveInstaller = "googledrivefilestream.exe"
-Invoke-WebRequest "http://dl.google.com/drive-file-stream/googledrivefilestream.exe" -OutFile $InstallerPath\$DriveInstaller
+$DriveInstaller = "GoogleDriveFSSetup.exe"
+Invoke-WebRequest "https://dl.google.com/drive-file-stream/GoogleDriveFSSetup.exe" -OutFile $InstallerPath\$DriveInstaller
 Start-Process -FilePath $InstallerPath\$DriveInstaller -Args "/silent /install" -Verb RunAs -Wait
 Remove-Item $InstallerPath\$DriveInstaller
 Write-Host "Google FileStream has been installed." -ForegroundColor Green
@@ -88,18 +95,37 @@ Start-Process msiexec.exe -Wait -ArgumentList "/I $InstallerPath\$VonageInstalle
 Remove-Item $InstallerPath\$VonageInstaller
 Write-Host "Vonage has been installed." -ForegroundColor Green
 
-# Install Fortinet - needs to be tested
+# Install Fortinet 
+<#
 $FortinetArchive = "FortiClientSetup_6.4.1.1519_x64.zip"
+New-Item -Path $InstallerPath -Name "FortinetFiles" -ItemType "directory"
 Invoke-WebRequest "http://d3gpjj9d20n0p3.cloudfront.net/forticlient/downloads/FortiClientSetup_6.4.1.1519_x64.zip" -OutFile $InstallerPath\$FortinetArchive
-Expand-Archive -LiteralPath "$InstallerPath\$FortinetArchive" -DestinationPath "$InstallerPath"
-Start-Process msiexec.exe -Wait -ArgumentList "/I $InstallerPath\FortiClient.msi /quiet /norestart"
+Expand-Archive -LiteralPath "$InstallerPath\$FortinetArchive" -DestinationPath "$InstallerPath\FortinetFiles"
+Start-Process msiexec.exe -Wait -ArgumentList "/I $InstallerPath\FortinetFiles\FortiClient.msi /quiet /norestart"
 Remove-Item $InstallerPath\$FortinetArchive
+Remove-Item "$InstallerPath\FortinetFiles"
 Write-Host "Fortinet has been installed." -ForegroundColor Green
+#>
 
-# Install Office
+# Install Fortinet VPN
+$FortinetExe = "FortiClientVPNOnlineInstaller_6.4.exe"
+Invoke-WebRequest "http://filestore.fortinet.com/forticlient/downloads/FortiClientVPNOnlineInstaller_6.4.exe" -OutFile $InstallerPath\$FortinetExe
+Start-Process -FilePath $InstallerPath\$FortinetExe -Args "/silent /install" -Verb RunAs -Wait
+Remove-Item $InstallerPath\$FortinetExe
+Write-Host "Fortinet VPN client has been installed." -ForegroundColor Green
 
-# Install phish alert KnowBe4
-# Need to be completed with local msi and serial key
+# Install Office - not done
+<#
+$OfficeExe = "setup.exe"
+New-Item -Path $InstallerPath -Name "OfficeSetup" -ItemType "directory"
+Invoke-WebRequest "http://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13426-20308.exe" -OutFile $InstallerPath\$OfficeExe
+Start-Process -FilePath $InstallerPath\$OfficeExe -Args "/download downloadconfig.xml" -Verb RunAs -Wait
+Start-Process -FilePath $InstallerPath\$OfficeExe -Args "/configure installconfig.xml" -Verb RunAs -Wait
+Remove-Item $InstallerPath\$OfficeExe
+Remove-Item "$InstallerPath\OfficeSetup"
+#>
+
+# Install phish alert KnowBe4 - need to be completed with local msi and serial key
 
 # Complete
 Write-Host "Settings changed, script now complete. Please restart your machine to finalize changes." -ForegroundColor Magenta
