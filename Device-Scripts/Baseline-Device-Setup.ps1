@@ -17,6 +17,10 @@ Start-Sleep -s 10
 rundll32.exe user32.dll, UpdatePerUserSystemParameters, 0, $false
 Write-Host "Background has been changed. Refresh the desktop if not automatically updated." -ForegroundColor Green
 
+# Disable color scheme and background personalization
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\" -Name NoDispAppearancePage -Value "1"
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop\" -Name NoChangingWallPaper -Value "1"
+
 # Disable security questions for local accounts
 REG ADD "HKLM\SOFTWARE\Policies\Microsoft\Windows\Control Panel\Desktop" /v NoLocalPasswordResetQuestions /t REG_DWORD /d "1" /f
 

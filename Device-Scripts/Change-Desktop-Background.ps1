@@ -11,3 +11,6 @@ Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 # Update user profile
 Start-Sleep -s 10
 rundll32.exe user32.dll, UpdatePerUserSystemParameters, 0, $false
+
+# Disable background change
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop\" -Name NoChangingWallPaper -Value "1"
