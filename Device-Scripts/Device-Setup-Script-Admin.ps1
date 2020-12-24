@@ -18,7 +18,7 @@ $LocalAdmin | Set-LocalUser -Password $AccountPasswordSecure
 Write-Host "Changed password for local admin to $AccountPassword" -ForegroundColor Green
 
 # Update windows
-Download-WindowsUpdate -Confirm -Force
+Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -IgnoreReboot
 Write-Host "Updates checked and have completed installation." -ForegroundColor Green
 
 # Gather system information and send to email (update to automatic HTTP request at later point)
