@@ -1,8 +1,22 @@
+# Get asset tag
+$Option = 'N'
+While ($Option -eq 'N'){
+
+    # Menu check to confim asset tag
+    $AssetTag = Read-Host "Please enter the LAST four digits of this devices asset tag"
+    Write-Host "Last four digits: $AssetTag"
+    $Option = Read-Host 'Enter [Y] to confirm or [N] to chance asset tag' 
+
+    # Not valid input
+    if (($Option -ne 'Y') -or ($Option -ne 'y')) {
+        Write-Host 'Please confirm with [Y] or [y].'
+        $Option = 'N'
+    }
+    
+}
+
 # Install PS module
 Install-Module PSWindowsUpdate -Force
-
-# Get asset tag
-$AssetTag = Read-Host "Please enter last four digits of asset tag"
 
 # Rename computer
 Rename-Computer -NewName "LS$AssetTag"
