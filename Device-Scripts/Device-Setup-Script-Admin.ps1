@@ -62,6 +62,15 @@ Send-MailMessage -From $MailFrom -to $MailTo -Subject $Subject `
 -Credential $Login -UseSsl
 Write-Host "Email has been sent containing device details." -ForegroundColor Green
 
+# Sync time
+net stop w32time
+w32tm /unregister
+w32tm /register
+net start w32time
+w32tm /resync /nowait
+Write-Host "Time has been synced. Waiting ten seconds before continuing execution." -ForegroundColor Green
+Start-Sleep -s 10
+
 # Run Comodo installer
 $ComodoPath = "PATH_TO_INSTALLER"
 Start-Process -FilePath $ComodoPath -Args "/silent /install" -Verb RunAs -Wait
