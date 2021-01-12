@@ -1,4 +1,5 @@
 # Gather system information and send to email (update to automatic HTTP request at later point)
+$AssetTag = hostname
 $Model = $(Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Model).Model
 $Manufacturer = $(Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object Manufacturer).Manufacturer
 $Serial = $(Get-WmiObject win32_bios | Select-Object Serialnumber).Serialnumber
@@ -16,8 +17,8 @@ $MailTo = "SEND_TO"
 $SmtpServer = "outlook.office365.com"
 $SmtpPort = 587
 
-$Subject = "DEVICE INFO FOR LS$AssetTag"
-$Body = "AssetTag: LS$AssetTag `nModel: $Model `nManufacturer: $Manufacturer `nSerial: $Serial"
+$Subject = "DEVICE INFO FOR $AssetTag"
+$Body = "AssetTag: $AssetTag `nModel: $Model `nManufacturer: $Manufacturer `nSerial: $Serial"
 
 # Send email
 Send-MailMessage -From $MailFrom -to $MailTo -Subject $Subject `
