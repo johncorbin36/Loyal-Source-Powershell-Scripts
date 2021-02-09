@@ -1,7 +1,7 @@
-# LoyalSource Powershell Scripts
-A collection of Powershell scripts I wrote and used while employed at [LoyalSource](https://loyalsource.com/). An Orlando-based workforce solutions provider with exceptional custom solutions for private and government agencies. 
+# Loyal Source Powershell Scripts
+A collection of Powershell scripts I wrote and used while employed at [Loyal Source](https://loyalsource.com/). An Orlando-based workforce solutions provider with exceptional custom solutions for private and government agencies. 
 
-![LoyalSource Logo.](Loyal-Source-Logo.png "LoyalSource Logo.")
+![Loyal Source Logo.](Loyal-Source-Logo.png "LoyalSource Logo.")
 
 ## Descriptions
 ### TerminateUsers.ps1
