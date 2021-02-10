@@ -9,4 +9,4 @@ $ValueExists = (Get-Item "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09
 $SerialNumber = (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09\1.0").SerialNumber
 
 ### One liner 
-# if ((Get-Item "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09\1.0" -EA Ignore).Property -contains "SerialNumber") { (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09\1.0").SerialNumber }
+if ((Get-Item "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09\1.0" -EA Ignore).Property -contains "SerialNumber") { (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Nuance\Shared\Products\AS09\1.0").SerialNumber }
