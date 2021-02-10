@@ -1,5 +1,5 @@
-# Loyal Source Powershell Scripts
-A collection of Powershell scripts I wrote and used while employed at [Loyal Source](https://loyalsource.com/). An Orlando-based workforce solutions provider with exceptional custom solutions for private and government agencies. 
+# Loyal Source Government Services Scripts
+A collection of Powershell and Python scripts I write and use while employed at [Loyal Source](https://loyalsource.com/). An Orlando-based workforce solutions provider with exceptional custom solutions for private and government agencies. 
 
 ![Loyal Source Logo.](Loyal-Source-Logo.png "LoyalSource Logo.")
 
