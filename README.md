@@ -3,6 +3,9 @@ A collection of Powershell and Python scripts I write and use while employed at 
 
 ![Loyal Source Logo.](Loyal-Source-Logo.png "LoyalSource Logo.")
 
-## Descriptions
-### TerminateUsers.ps1
-A script built to terminate users inside of Microsoft 365. This script signs a user out of all devices, resets the account password, disables ActiveSync and OWA, forwards emails to a manager email and removes user from all groups and lists.  
+## Directory Description
+### Comodo-Scripts
+Comodo Scripts contains all Python scripts I use as procedures on Comodo One. 
+
+### Production-Scripts
+Production Scripts contain all Powershell scripts that are not necessarily categorized into any other directory, but are regularly used as Loyal Source. 
